@@ -1,0 +1,45 @@
+import pandas as pd
+import math
+import numpy as np
+import csv
+import matplotlib.pyplot as plt
+import time
+start=time.clock()
+df_cities=pd.read_csv("routeline/all/cities.csv")
+
+#判断是否是素数
+def sieve_of_eratosthenes(n):
+    primes = [True for i in range(n+1)] # Start assuming all numbers are primes
+    primes[0] = False # 0 is not a prime
+    primes[1] = False # 1 is not a prime
+    for i in range(2,int(np.sqrt(n)) + 1):
+        if primes[i]:
+            k = 2
+            while i*k <= n:
+                primes[i*k] = False
+                k += 1
+    return(primes)
+prime_cities = sieve_of_eratosthenes(max(df_cities.CityId))
+#计算最短路径
+def min_distance(dfcity,path):
+    prev_city = path[0]
+    step_num = 1
+    for city_num in path[1:]:
+        next_city = city_num
+        total_distance = total_distance + \
+            np.sqrt(pow((dfcity.X[city_num] - dfcity.X[prev_city]),2) + pow((dfcity.Y[city_num] - dfcity.Y[prev_city]),2)) * \
+            (1+ 0.1*((step_num % 10 == 0)*int(not(prime_cities[prev_city]))))
+        prev_city = next_city
+        step_num = step_num + 1
+    return total_distance
+
+sorted_cities = list(df_cities.iloc[1:,].sort_values(['X','Y'])['CityId'])
+sorted_cities = [0] + sorted_cities + [0]
+print('Total distance with the dumbest path is '+ "{:,}".format(total_distance(df_cities, sorted_cities)))
+
+end=time.clock()
+print("final is in ",end-start)
+# out = open('routeline/all/write.csv', 'w', newline='')
+# csv_write = csv.writer(out, dialect='excel')
+# csv_write.writerows(np.mat(sub_num).transpose())
+# out.close()
